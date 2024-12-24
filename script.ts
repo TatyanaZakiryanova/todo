@@ -3,6 +3,7 @@ interface ITodo {
   task: string;
   completed: boolean;
   markCompleted(): void;
+  markIncomplete(): void;
 }
 
 class Todo implements ITodo {
@@ -17,7 +18,10 @@ class Todo implements ITodo {
 
   markCompleted(): void {
     this.completed = true;
-    alert(`Task ${this.task} completed`);
+  }
+
+  markIncomplete(): void {
+    this.completed = false;
   }
 }
 
@@ -38,6 +42,7 @@ class TodoApp {
   public markAllCompleted(): void {
     this.todos.forEach((todo) => todo.markCompleted());
     this.render();
+    alert('All tasks are completed');
   }
 
   private render(): void {
@@ -46,7 +51,28 @@ class TodoApp {
       todoListContainer.innerHTML = '';
       this.todos.forEach((todo) => {
         const todoElement = document.createElement('li');
-        todoElement.textContent = todo.task;
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = todo.completed;
+
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            todo.markCompleted();
+          } else {
+            todo.markIncomplete();
+          }
+          this.render();
+        });
+
+        todoElement.appendChild(checkbox);
+
+        const taskText = document.createElement('span');
+        taskText.textContent = todo.task;
+        if (todo.completed) {
+          taskText.style.textDecoration = 'line-through';
+        }
+        todoElement.appendChild(taskText);
 
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'X';
@@ -65,6 +91,7 @@ const todoApp = new TodoApp();
 
 const addButton = document.getElementById('add-btn');
 const taskInput = document.getElementById('task-input') as HTMLInputElement;
+const markAllButton = document.getElementById('mark-all-btn');
 
 if (addButton && taskInput) {
   addButton.addEventListener('click', () => {
@@ -73,5 +100,11 @@ if (addButton && taskInput) {
       todoApp.addTodo(task);
       taskInput.value = '';
     }
+  });
+}
+
+if (markAllButton) {
+  markAllButton.addEventListener('click', () => {
+    todoApp.markAllCompleted();
   });
 }
