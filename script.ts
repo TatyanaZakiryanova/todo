@@ -47,8 +47,31 @@ class TodoApp {
       this.todos.forEach((todo) => {
         const todoElement = document.createElement('li');
         todoElement.textContent = todo.task;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'X';
+
+        deleteButton.onclick = () => {
+          this.removeTodo(todo.id);
+        };
+        todoElement.appendChild(deleteButton);
         todoListContainer.appendChild(todoElement);
       });
     }
   }
+}
+
+const todoApp = new TodoApp();
+
+const addButton = document.getElementById('add-btn');
+const taskInput = document.getElementById('task-input') as HTMLInputElement;
+
+if (addButton && taskInput) {
+  addButton.addEventListener('click', () => {
+    const task = taskInput.value.trim();
+    if (task) {
+      todoApp.addTodo(task);
+      taskInput.value = '';
+    }
+  });
 }
