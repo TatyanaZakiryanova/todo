@@ -146,6 +146,17 @@ if (addButton && taskInput) {
         }
     });
 }
+if (taskInput) {
+    taskInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            const task = taskInput.value.trim();
+            if (task) {
+                todoApp.addTodo(task);
+                taskInput.value = '';
+            }
+        }
+    });
+}
 if (markAllButton) {
     markAllButton.addEventListener('click', () => {
         todoApp.markAllCompleted();
