@@ -49,8 +49,11 @@ class TodoApp {
     const todoListContainer = document.getElementById('todo-list');
     if (todoListContainer) {
       todoListContainer.innerHTML = '';
-      this.todos.forEach((todo) => {
+      this.todos.forEach((todo, index) => {
         const todoElement = document.createElement('li');
+        todoElement.draggable = true;
+        //присваивает атрибут data-index каждому li
+        todoElement.dataset.index = index.toString();
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
@@ -81,8 +84,64 @@ class TodoApp {
           this.removeTodo(todo.id);
         };
         todoElement.appendChild(deleteButton);
+
+        // Drag-and-drop события
+        todoElement.addEventListener('dragstart', (e) => this.handleDragStart(e));
+        todoElement.addEventListener('dragover', (e) => this.handleDragOver(e));
+        todoElement.addEventListener('drop', (e) => this.handleDrop(e));
+        todoElement.addEventListener('dragend', (e) => this.handleDragEnd(e));
+
         todoListContainer.appendChild(todoElement);
       });
+    }
+  }
+
+  private handleDragStart(e: DragEvent): void {
+    //получение элемента, с которого началось перетаскивание
+    const target = e.target as HTMLElement;
+    if (target && target.dataset.index) {
+      //сохранение индекса перетаскиваемого элемента в dataTransfer
+      e.dataTransfer?.setData('text/plain', target.dataset.index);
+      target.classList.add('dragging');
+    }
+  }
+
+  private handleDragOver(e: DragEvent): void {
+    e.preventDefault();
+    //получение элемента, над которым в данный момент находится перетаскиваемый элемент
+    const target = e.target as HTMLElement;
+    if (target && target.dataset.index) {
+      //выделение рамкой возможного места для drop
+      target.style.border = '2px dashed #ccc';
+    }
+  }
+
+  private handleDrop(e: DragEvent): void {
+    e.preventDefault();
+
+    //индекс элемента, который перетащили
+    const fromIndex = e.dataTransfer?.getData('text/plain');
+    const target = e.target as HTMLElement;
+    //индекс элемента, на который перетащили
+    const toIndex = target.closest('li')?.dataset.index;
+
+    if (fromIndex && toIndex && fromIndex !== toIndex) {
+      const from = parseInt(fromIndex, 10);
+      const to = parseInt(toIndex, 10);
+
+      //удаление элемента из массива todos по индексу from
+      //и вставка по индексу to
+      const [movedTodo] = this.todos.splice(from, 1);
+      this.todos.splice(to, 0, movedTodo);
+
+      this.render();
+    }
+  }
+
+  private handleDragEnd(e: DragEvent): void {
+    const target = e.target as HTMLElement;
+    if (target) {
+      target.classList.remove('dragging');
     }
   }
 }

@@ -66,10 +66,19 @@ li {
   justify-content: space-between;
   align-items: center;
   transition: background-color 0.3s ease;
+  cursor: move;
 }
 
 li:hover {
   background-color: rgb(241, 241, 241);
+}
+
+li.dragging {
+  opacity: 0.5;
+}
+
+li[data-index] {
+  cursor: move;
 }
 
 button {

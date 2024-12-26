@@ -34,8 +34,11 @@ class TodoApp {
         const todoListContainer = document.getElementById('todo-list');
         if (todoListContainer) {
             todoListContainer.innerHTML = '';
-            this.todos.forEach((todo) => {
+            this.todos.forEach((todo, index) => {
                 const todoElement = document.createElement('li');
+                todoElement.draggable = true;
+                //присваивает атрибут data-index каждому li
+                todoElement.dataset.index = index.toString();
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.checked = todo.completed;
@@ -61,8 +64,56 @@ class TodoApp {
                     this.removeTodo(todo.id);
                 };
                 todoElement.appendChild(deleteButton);
+                // Drag-and-drop события
+                todoElement.addEventListener('dragstart', (e) => this.handleDragStart(e));
+                todoElement.addEventListener('dragover', (e) => this.handleDragOver(e));
+                todoElement.addEventListener('drop', (e) => this.handleDrop(e));
+                todoElement.addEventListener('dragend', (e) => this.handleDragEnd(e));
                 todoListContainer.appendChild(todoElement);
             });
+        }
+    }
+    handleDragStart(e) {
+        var _a;
+        //получение элемента, с которого началось перетаскивание
+        const target = e.target;
+        if (target && target.dataset.index) {
+            //сохранение индекса перетаскиваемого элемента в dataTransfer
+            (_a = e.dataTransfer) === null || _a === void 0 ? void 0 : _a.setData('text/plain', target.dataset.index);
+            target.classList.add('dragging');
+        }
+    }
+    handleDragOver(e) {
+        e.preventDefault();
+        //получение элемента, над которым в данный момент находится перетаскиваемый элемент
+        const target = e.target;
+        if (target && target.dataset.index) {
+            //выделение рамкой возможного места для drop
+            target.style.border = '2px dashed #ccc';
+        }
+    }
+    handleDrop(e) {
+        var _a, _b;
+        e.preventDefault();
+        //индекс элемента, который перетащили
+        const fromIndex = (_a = e.dataTransfer) === null || _a === void 0 ? void 0 : _a.getData('text/plain');
+        const target = e.target;
+        //индекс элемента, на который перетащили
+        const toIndex = (_b = target.closest('li')) === null || _b === void 0 ? void 0 : _b.dataset.index;
+        if (fromIndex && toIndex && fromIndex !== toIndex) {
+            const from = parseInt(fromIndex, 10);
+            const to = parseInt(toIndex, 10);
+            //удаление элемента из массива todos по индексу from
+            //и вставка по индексу to
+            const [movedTodo] = this.todos.splice(from, 1);
+            this.todos.splice(to, 0, movedTodo);
+            this.render();
+        }
+    }
+    handleDragEnd(e) {
+        const target = e.target;
+        if (target) {
+            target.classList.remove('dragging');
         }
     }
 }
