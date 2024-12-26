@@ -28,19 +28,38 @@ class Todo implements ITodo {
 class TodoApp {
   todos: ITodo[] = [];
 
+  constructor() {
+    this.loadTodos();
+  }
+
+  private loadTodos(): void {
+    const savedTodos = localStorage.getItem('todos');
+    if (savedTodos) {
+      this.todos = JSON.parse(savedTodos);
+      this.render();
+    }
+  }
+
+  private saveTodos(): void {
+    localStorage.setItem('todos', JSON.stringify(this.todos));
+  }
+
   public addTodo(task: string): void {
     const newTodo: ITodo = new Todo(this.todos.length + 1, task);
     this.todos.push(newTodo);
+    this.saveTodos();
     this.render();
   }
 
   public removeTodo(id: number): void {
     this.todos = this.todos.filter((todo) => todo.id !== id);
+    this.saveTodos();
     this.render();
   }
 
   public markAllCompleted(): void {
     this.todos.forEach((todo) => todo.markCompleted());
+    this.saveTodos();
     this.render();
     alert('All tasks are completed');
   }
@@ -65,6 +84,7 @@ class TodoApp {
           } else {
             todo.markIncomplete();
           }
+          this.saveTodos();
           this.render();
         });
 
@@ -134,6 +154,7 @@ class TodoApp {
       const [movedTodo] = this.todos.splice(from, 1);
       this.todos.splice(to, 0, movedTodo);
 
+      this.saveTodos();
       this.render();
     }
   }

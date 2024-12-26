@@ -15,18 +15,32 @@ class Todo {
 class TodoApp {
     constructor() {
         this.todos = [];
+        this.loadTodos();
+    }
+    loadTodos() {
+        const savedTodos = localStorage.getItem('todos');
+        if (savedTodos) {
+            this.todos = JSON.parse(savedTodos);
+            this.render();
+        }
+    }
+    saveTodos() {
+        localStorage.setItem('todos', JSON.stringify(this.todos));
     }
     addTodo(task) {
         const newTodo = new Todo(this.todos.length + 1, task);
         this.todos.push(newTodo);
+        this.saveTodos();
         this.render();
     }
     removeTodo(id) {
         this.todos = this.todos.filter((todo) => todo.id !== id);
+        this.saveTodos();
         this.render();
     }
     markAllCompleted() {
         this.todos.forEach((todo) => todo.markCompleted());
+        this.saveTodos();
         this.render();
         alert('All tasks are completed');
     }
@@ -49,6 +63,7 @@ class TodoApp {
                     else {
                         todo.markIncomplete();
                     }
+                    this.saveTodos();
                     this.render();
                 });
                 todoElement.appendChild(checkbox);
@@ -107,6 +122,7 @@ class TodoApp {
             //и вставка по индексу to
             const [movedTodo] = this.todos.splice(from, 1);
             this.todos.splice(to, 0, movedTodo);
+            this.saveTodos();
             this.render();
         }
     }
